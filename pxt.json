@@ -14,5 +14,9 @@
     "testFiles": [
         "test.ts"
     ],
+    "supportedTargets": [
+        "calliopemini",
+        "microbit"
+    ],
     "preferredEditor": "tsprj"
 }
