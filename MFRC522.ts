@@ -453,6 +453,20 @@ namespace MFRC522 {
    }
 
     /*
+     * Function to read ID from card (nicht blockierend)
+     */
+    //% block="Read ID"
+    //% weight=95
+    export function getIDwithoutBlocking(): number {
+        let id = readID()
+        if (id != undefined && id != null) {
+            return id
+        }
+        return 0
+    }
+ 
+
+    /*
      * Function to read Data from card
      */
     //% block="Read data"
