@@ -8,8 +8,8 @@
     "files": [
         "README.md",
         "MFRC522.ts",
-        "_locales/de/pxt-rfid-mfrc522-customPin-jsdoc-strings.json",
-        "_locales/de/pxt-rfid-mfrc522-customPin-strings.json"
+        "_locales/de/pxt-mfrc522-customPin-jsdoc-strings.json",
+        "_locales/de/pxt-mfrc522-customPin-strings.json"
     ],
     "testFiles": [
         "test.ts"
