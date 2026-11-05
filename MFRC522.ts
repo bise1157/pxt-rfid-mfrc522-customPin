@@ -479,27 +479,28 @@ namespace MFRC522 {
     //% block="Read ID (non-blocking)"
     //% weight=94
     export function getIDwithoutBlocking(): number {
-        // 1. Karte anpingen
+        serial.writeLine("DEBUG: vor Request")
         let req = Request(PICC_REQIDL)
+        serial.writeLine("DEBUG: nach Request")
+
         if (!req || req[0] != 0) {
             return 0
         }
 
-        // 2. Antikollision ausführen
+        serial.writeLine("DEBUG: vor AvoidColl")
         let coll = AvoidColl()
+        serial.writeLine("DEBUG: nach AvoidColl")
+
         if (!coll || coll[0] != 0) {
             return 0
         }
 
-        // 3. UID-Array absichern
         let uid = coll[1]
-        if (!uid || !Array.isArray(uid) || uid.length < 4) {
+        if (!uid || uid.length < 4) {
             return 0
         }
 
-        // 4. Nummer berechnen (nur wenn 4 Bytes garantiert existieren)
-        let idNum = (uid[0] << 24) | (uid[1] << 16) | (uid[2] << 8) | uid[3]
-        return idNum
+        return (uid[0] << 24) | (uid[1] << 16) | (uid[2] << 8) | uid[3]
     }
 
     /*
