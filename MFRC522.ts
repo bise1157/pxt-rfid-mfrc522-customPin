@@ -1,30 +1,29 @@
 /**
- * MFRC522 Block
+ * MFRC522 RFID Treiber für Calliope mini 1.x / micro:bit
  */
 //% color="#275C6B" weight=100 icon="\uf2bb" block="MFRC522 RFID"
 namespace MFRC522 {
-    let csPin: DigitalPin = DigitalPin.C4
+    let csPin: DigitalPin = DigitalPin.P1
 
-    let TPrescalerReg = 0x2B
-    let TxControlReg = 0x14
-    let PICC_READ = 0x30
-    let PICC_ANTICOLL = 0x93
-    let PCD_RESETPHASE = 0x0F
-    let Status2Reg = 0x08
-    let CommandReg = 0x01
-    let BitFramingReg = 0x0D
-    let MAX_LEN = 16
-    let PCD_AUTHENT = 0x0E
-    let PCD_TRANSCEIVE = 0x0C
-    let PICC_REQIDL = 0x26
-    let PICC_AUTHENT1A = 0x60
+    const TPrescalerReg = 0x2B
+    const TxControlReg = 0x14
+    const PICC_READ = 0x30
+    const PICC_ANTICOLL = 0x93
+    const PCD_RESETPHASE = 0x0F
+    const Status2Reg = 0x08
+    const CommandReg = 0x01
+    const BitFramingReg = 0x0D
+    const MAX_LEN = 16
+    const PCD_AUTHENT = 0x0E
+    const PCD_TRANSCEIVE = 0x0C
+    const PICC_REQIDL = 0x26
+    const PICC_AUTHENT1A = 0x60
 
-    let ComIrqReg = 0x04
-    let DivIrqReg = 0x05
-    let FIFODataReg = 0x09
-    let FIFOLevelReg = 0x0A
-    let ControlReg = 0x0C
-    let Key = [255, 255, 255, 255, 255, 255]
+    const ComIrqReg = 0x04
+    const DivIrqReg = 0x05
+    const FIFODataReg = 0x09
+    const FIFOLevelReg = 0x0A
+    const ControlReg = 0x0C
 
     function SetBits(reg: number, mask: number) {
         let tmp = SPI_Read(reg)
@@ -38,15 +37,19 @@ namespace MFRC522 {
 
     function SPI_Write(adr: number, val: number) {
         pins.digitalWritePin(csPin, 0)
+        control.waitMicros(5)
         pins.spiWrite((adr << 1) & 0x7E)
         pins.spiWrite(val)
+        control.waitMicros(5)
         pins.digitalWritePin(csPin, 1)
     }
 
     function SPI_Read(adr: number): number {
         pins.digitalWritePin(csPin, 0)
+        control.waitMicros(5)
         pins.spiWrite(((adr << 1) & 0x7E) | 0x80)
         let val = pins.spiWrite(0)
+        control.waitMicros(5)
         pins.digitalWritePin(csPin, 1)
         return val
     }
@@ -177,25 +180,30 @@ namespace MFRC522 {
 
     function getIDNum(uid: number[]): number {
         if (!uid || uid.length < 4) return 0
-        // Sichere Berechnung ohne 32-Bit-Überlaufprobleme
         return ((uid[0] << 24) >>> 0) + (uid[1] << 16) + (uid[2] << 8) + uid[3]
     }
 
     /*
-     * Initial setup
+     * Initialisierung des MFRC522-Moduls
      */
     //% block="Initialize MFRC522 Module CS %cs"
     //% weight=100
-    export function Init(cs: DigitalPin = DigitalPin.C4) {
+    export function Init(cs: DigitalPin = DigitalPin.P1) {
         csPin = cs
-        pins.spiPins(DigitalPin.C15, DigitalPin.C14, DigitalPin.C13)
+        // SPI Hardware-Pins für Calliope 1.x
+        pins.spiPins(DigitalPin.P15, DigitalPin.P14, DigitalPin.P13)
         pins.spiFormat(8, 0)
-        pins.digitalWritePin(csPin, 1)
+        // Gedrosselte SPI-Frequenz (125 kHz), um Pegelprobleme mit der Display-Matrix zu vermeiden
+        pins.spiFrequency(125000)
 
-        // Reset module
+        pins.digitalWritePin(csPin, 1)
+        control.waitMicros(50)
+
+        // Soft-Reset des MFRC522
         SPI_Write(CommandReg, PCD_RESETPHASE)
         control.waitMicros(1000)
 
+        // Timer und Antenne einrichten
         SPI_Write(0x2A, 0x8D)
         SPI_Write(0x2B, 0x3E)
         SPI_Write(0x2D, 30)
@@ -203,6 +211,15 @@ namespace MFRC522 {
         SPI_Write(0x15, 0x40)
         SPI_Write(0x11, 0x3D)
         AntennaON()
+    }
+
+    /*
+     * Liest die Firmware-Version des MFRC522 aus Register 0x37
+     */
+    //% block="Get Firmware Version"
+    //% weight=96
+    export function getFirmwareVersion(): number {
+        return SPI_Read(0x37)
     }
 
     /*
@@ -232,6 +249,4 @@ namespace MFRC522 {
     //% block="Read ID"
     //% weight=94
     export function getID(): number {
-        return getIDwithoutBlocking()
-    }
-}
+        return getIDwithout
