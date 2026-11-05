@@ -1,6 +1,6 @@
 {
     "name": "pxt-rfid-mfrc522-customPin",
-    "version": "1.0.7",
+    "version": "1.0.8",
     "description": "MakeCode package for Joy-IT MFRC522 RFID module with configurable CS/SDA pin support",
     "dependencies": {
         "core": "*"
