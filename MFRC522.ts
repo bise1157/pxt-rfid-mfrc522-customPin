@@ -3,6 +3,9 @@
   */
 //% color="#275C6B" weight=100 icon="\uf2bb" block="MFRC522 RFID"
 namespace MFRC522 {
+    // Modulweiter Speicher für den CS-Pin (Standard P16 / C16)
+    let csPin: DigitalPin = DigitalPin.P16
+ 
     let Type2=0
     const BlockAdr: number[] = [8, 9, 10]
     let TPrescalerReg = 0x2B
@@ -46,10 +49,10 @@ namespace MFRC522 {
     }
 
     function SPI_Write (adr: number, val: number) {
-        pins.digitalWritePin(DigitalPin.P16, 0)
+        pins.digitalWritePin(csPin, 0)
         pins.spiWrite((adr << 1) & 0x7E)
         pins.spiWrite(val)
-        pins.digitalWritePin(DigitalPin.P16, 1)
+        pins.digitalWritePin(csPin, 1)
     }
 
     function readFromCard ():string {
@@ -88,10 +91,10 @@ namespace MFRC522 {
     }
 
     function SPI_Read (adr: number) {
-        pins.digitalWritePin(DigitalPin.P16, 0)
+        pins.digitalWritePin(csPin, 0)
         pins.spiWrite(((adr<<1)& 0x7E)|0x80)
         val = pins.spiWrite(0)
-        pins.digitalWritePin(DigitalPin.P16, 1)
+        pins.digitalWritePin(csPin, 1)
         return val
     }
 
@@ -415,10 +418,11 @@ namespace MFRC522 {
      */
     //% block="Initialize MFRC522 Module"
     //% weight=100
-   export function Init() {
+   export function Init(cs: DigitalPin = DigitalPin.P16) {
+       csPin = cs
        pins.spiPins(DigitalPin.P15, DigitalPin.P14, DigitalPin.P13)
        pins.spiFormat(8, 0)
-       pins.digitalWritePin(DigitalPin.P16, 1)
+       pins.digitalWritePin(csPin, 1)
 
        // reset module
        SPI_Write(CommandReg, PCD_RESETPHASE)
