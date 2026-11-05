@@ -397,7 +397,7 @@ namespace MFRC522 {
         }
         return a
     }
-
+/*
     function readID() {
         [status, Type2] = Request(PICC_REQIDL)
 
@@ -411,6 +411,22 @@ namespace MFRC522 {
         }
 
         return getIDNum(uid)
+    }
+*/
+    function readID(): number {
+        let req = Request(PICC_REQIDL)
+        if (!req || req[0] != 0) {
+            return 0
+        }
+
+        let coll = AvoidColl()
+        if (!coll || coll[0] != 0 || !coll[1]) {
+            return 0
+        }
+
+        let uid = coll[1]
+        let idNum = getIDNum(uid)
+        return idNum ? idNum : 0
     }
 
     /*
