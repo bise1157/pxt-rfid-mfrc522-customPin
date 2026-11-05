@@ -7,9 +7,7 @@
     },
     "files": [
         "README.md",
-        "MFRC522.ts",
-        "_locales/de/pxt-mfrc522-customPin-jsdoc-strings.json",
-        "_locales/de/pxt-mfrc522-customPin-strings.json"
+        "MFRC522.ts"
     ],
     "testFiles": [
         "test.ts"
