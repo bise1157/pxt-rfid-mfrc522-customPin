@@ -249,4 +249,6 @@ namespace MFRC522 {
     //% block="Read ID"
     //% weight=94
     export function getID(): number {
-        return getIDwithout
+        return getIDwithoutBlocking()
+    }
+}
