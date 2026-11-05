@@ -473,14 +473,34 @@ namespace MFRC522 {
      */
     //% block="Read ID"
     //% weight=95
+    /*
+     * Crash-sichere und nicht-blockierende ID-Abfrage
+     */
+    //% block="Read ID (non-blocking)"
+    //% weight=94
     export function getIDwithoutBlocking(): number {
-        let id = readID()
-        if (id != undefined && id != null) {
-            return id
+        // 1. Karte anpingen
+        let req = Request(PICC_REQIDL)
+        if (!req || req[0] != 0) {
+            return 0
         }
-        return 0
+
+        // 2. Antikollision ausführen
+        let coll = AvoidColl()
+        if (!coll || coll[0] != 0) {
+            return 0
+        }
+
+        // 3. UID-Array absichern
+        let uid = coll[1]
+        if (!uid || !Array.isArray(uid) || uid.length < 4) {
+            return 0
+        }
+
+        // 4. Nummer berechnen (nur wenn 4 Bytes garantiert existieren)
+        let idNum = (uid[0] << 24) | (uid[1] << 16) | (uid[2] << 8) | uid[3]
+        return idNum
     }
- 
 
     /*
      * Function to read Data from card
